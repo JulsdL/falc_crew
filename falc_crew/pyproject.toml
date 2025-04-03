@@ -1,8 +1,8 @@
 [project]
 name = "falc_crew"
-version = "0.1.0"
+version = "0.0.1"
 description = "falc_crew using crewAI"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+authors = [{ name = "Julien de Lambilly", email = "" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "crewai[tools]>=0.108.0,<1.0.0"
