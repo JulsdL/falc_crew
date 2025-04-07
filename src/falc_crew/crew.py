@@ -1,5 +1,7 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
+from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconInjectorTool
+from crewai.knowledge import FileKnowledge #Importe automatiquement les fichiers du dossier knowledge
 
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -22,6 +24,7 @@ class FalcCrew():
     def falc_translator(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_translator'],
+            tools=[FalcIconInjectorTool()],
             verbose=True
         )
 
@@ -36,6 +39,7 @@ class FalcCrew():
     def falc_document_designer(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_document_designer'],
+            tools=[FalcDocxWriterTool()],
             verbose=True
         )
 
@@ -85,5 +89,9 @@ class FalcCrew():
             tasks=self.tasks, # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
+            knowledge_sources=[
+            FileKnowledge(path="knowledge/falc_guidelines.md"),
+            FileKnowledge(path="knowledge/icons.json")
+        ]
             # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )
