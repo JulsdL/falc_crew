@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import sys
+import os
 import warnings
 
 from datetime import datetime
 
 from falc_crew.crew import FalcCrew
+from falc_crew.tools.custom_tool import WordExtractorTool
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -13,13 +15,18 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run():
+def run(file_path: str):
     """
     Run the crew.
     """
+    print(f"📄 Lecture du fichier source : {file_path}")
+    extractor = WordExtractorTool()
+    text = extractor._run(file_path)
+
+    print("🚀 Lancement du crew avec le contenu extrait...")
     inputs = {
-        'topic': 'AI LLMs',
-        'current_year': str(datetime.now().year)
+        "original_text": text,
+        "source_filename": os.path.basename(file_path)
     }
 
     try:

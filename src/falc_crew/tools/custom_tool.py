@@ -22,6 +22,23 @@ class MyCustomTool(BaseTool):
         # Implementation goes here
         return "this is an example of a tool output, ignore it and move along."
 
+# ========== WordExtractorTool ==========
+class WordExtractorInput(BaseModel):
+    file_path: str = Field(..., description="Chemin vers le document Word source (.docx)")
+
+
+class WordExtractorTool(BaseTool):
+    name: str = "WordExtractorTool"
+    description: str = "Lit le contenu texte d'un document Word (.docx) et retourne le texte brut."
+    args_schema: Type[BaseModel] = WordExtractorInput
+
+    def _run(self, file_path: str) -> str:
+        if not os.path.exists(file_path):
+            return "⚠️ Le fichier spécifié est introuvable."
+
+        doc = Document(file_path)
+        text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
+        return text
 
 # ========== FalcDocxWriterTool ==========
 class FalcDocxWriterInput(BaseModel):

@@ -2,6 +2,9 @@ translate_text_task:
   description: >
     Translate the following text into FALC using provided editorial and design rules.
     Focus on short sentences, active voice, familiar vocabulary, and structure clarity.
+
+    Text to translate:
+    {original_text}
   expected_output: >
     A markdown version of the FALC-compliant text, respecting the structure and
     accessible language rules.
