@@ -1,17 +1,35 @@
-research_task:
+translate_text_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Translate the following text into FALC using provided editorial and design rules.
+    Focus on short sentences, active voice, familiar vocabulary, and structure clarity.
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
+    A markdown version of the FALC-compliant text, respecting the structure and
+    accessible language rules.
+  agent: falc_translator
 
-reporting_task:
+quality_check_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Review the FALC text for accuracy, compliance with FALC rules, and structure.
+    Correct non-compliant sections. Explain changes if needed.
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    Finalized markdown with FALC-compliant text and explanation of adjustments.
+  agent: falc_quality_analyst
+
+generate_docx_task:
+  description: >
+    Convert the markdown text into a .docx document using predefined
+    formatting guidelines:
+    Arial font, size 10 for body text, size 8 for headers, spacing 1.5x.
+  expected_output: >
+    A Word (.docx) document saved to output/ directory,
+    named `falc_translated_output.docx`
+  agent: falc_document_designer
+
+validate_visual_design_task:
+  description: >
+    Validate that the generated Word document adheres to FALC visual design.
+    Check typography, spacing, alignment, and section layout.
+  expected_output: >
+    A short markdown report confirming if the document matches FALC
+    visual standards or requires changes.
+  agent: falc_visual_checker

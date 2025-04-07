@@ -17,34 +17,61 @@ class FalcCrew():
 
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
+
     @agent
-    def researcher(self) -> Agent:
+    def falc_translator(self) -> Agent:
         return Agent(
-            config=self.agents_config['researcher'],
+            config=self.agents_config['falc_translator'],
             verbose=True
         )
 
     @agent
-    def reporting_analyst(self) -> Agent:
+    def falc_quality_analyst(self) -> Agent:
         return Agent(
-            config=self.agents_config['reporting_analyst'],
+            config=self.agents_config['falc_quality_analyst'],
             verbose=True
         )
+
+    @agent
+    def falc_document_designer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['falc_document_designer'],
+            verbose=True
+        )
+
+    @agent
+    def falc_visual_checker(self) -> Agent:
+        return Agent(
+            config=self.agents_config['falc_visual_checker'],
+            verbose=True
+        )
+
 
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
     # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
-    def research_task(self) -> Task:
+    def translate_text_task(self) -> Task:
         return Task(
-            config=self.tasks_config['research_task'],
+            config=self.tasks_config['translate_text_task'],
         )
 
     @task
-    def reporting_task(self) -> Task:
+    def quality_check_task(self) -> Task:
         return Task(
-            config=self.tasks_config['reporting_task'],
-            output_file='report.md'
+            config=self.tasks_config['quality_check_task'],
+        )
+
+    @task
+    def generate_docx_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['generate_docx_task'],
+        )
+
+    @task
+    def validate_visual_design_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['validate_visual_design_task'],
         )
 
     @crew
