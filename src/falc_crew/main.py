@@ -65,3 +65,17 @@ def test():
 
     except Exception as e:
         raise Exception(f"An error occurred while testing the crew: {e}")
+
+
+if __name__ == "__main__":
+    run()
+
+    # Inspect entity memory
+    from falc_crew.crew import FalcCrew
+    crew_instance = FalcCrew()
+    agent = crew_instance.falc_translator()
+
+    if agent.entity_memory:
+        print("🧠 ENTITÉS MÉMORISÉES")
+        for key, value in agent.entity_memory.store.items():
+            print(f"{key}: {value}")

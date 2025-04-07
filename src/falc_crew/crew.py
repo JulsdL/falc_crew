@@ -25,6 +25,7 @@ class FalcCrew():
         return Agent(
             config=self.agents_config['falc_translator'],
             tools=[FalcIconInjectorTool()],
+            memory=True,
             verbose=True
         )
 
@@ -32,6 +33,7 @@ class FalcCrew():
     def falc_quality_analyst(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_quality_analyst'],
+            memory=True,
             verbose=True
         )
 
@@ -40,6 +42,7 @@ class FalcCrew():
         return Agent(
             config=self.agents_config['falc_document_designer'],
             tools=[FalcDocxWriterTool()],
+            memory=True,
             verbose=True
         )
 
@@ -47,6 +50,7 @@ class FalcCrew():
     def falc_visual_checker(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_visual_checker'],
+            memory=True,
             verbose=True
         )
 
@@ -89,6 +93,7 @@ class FalcCrew():
             tasks=self.tasks, # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
+            memory=True,
             knowledge_sources=[
             FileKnowledge(path="knowledge/falc_guidelines.md"),
             FileKnowledge(path="knowledge/icons.json")
