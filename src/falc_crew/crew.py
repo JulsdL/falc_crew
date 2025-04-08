@@ -1,6 +1,7 @@
 from crewai import Agent, Crew, Process, Task
+from crewai_tools import RagTool
 from crewai.project import CrewBase, agent, crew, task
-from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconInjectorTool
+from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconInjectorTool, WordExtractorTool
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.knowledge.source.json_knowledge_source import JSONKnowledgeSource
 
@@ -19,6 +20,11 @@ class FalcCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
+    # Initialize RAG Tool once for reference model retrieval
+    rag_tool = RagTool()
+    rag_tool.add(data_type="directory", source="data/reference_models")
+    rag_tool.name = "ReferenceModelRetriever"
+
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
 
@@ -26,7 +32,7 @@ class FalcCrew():
     def falc_translator(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_translator'],
-            tools=[FalcIconInjectorTool()],
+            tools=[FalcIconInjectorTool(), WordExtractorTool(), self.rag_tool],
             memory=True,
             verbose=True
         )
