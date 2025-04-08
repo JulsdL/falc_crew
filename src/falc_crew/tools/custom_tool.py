@@ -101,3 +101,4 @@ class FalcIconInjectorTool(BaseTool):
             markdown_text = markdown_text.replace(keyword, f"{icon} {keyword}")
 
         return markdown_text
+
