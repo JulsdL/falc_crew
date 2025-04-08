@@ -3,6 +3,7 @@ __pycache__/
 .DS_Store
 *data/
 output/
+db/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
