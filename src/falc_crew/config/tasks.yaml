@@ -7,7 +7,6 @@ translate_text_task:
 
     Tool usage hint:
     Summarize the original text, and ask a question by calling the tool like:
-      kwargs:
         query: "What reference example matches a document about 'your summary' ?"
 
     If you find a good match, follow its style and reuse structure or tone.

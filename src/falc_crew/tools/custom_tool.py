@@ -1,26 +1,28 @@
 import os
 import json
 from crewai.tools import BaseTool
+from crewai_tools import RagTool
 from typing import Type
 from pydantic import BaseModel, Field
+from typing import Dict, Any
 from docx import Document
 from docx.shared import Pt
 
 
-class MyCustomToolInput(BaseModel):
-    """Input schema for MyCustomTool."""
-    argument: str = Field(..., description="Description of the argument.")
+# class MyCustomToolInput(BaseModel):
+#     """Input schema for MyCustomTool."""
+#     argument: str = Field(..., description="Description of the argument.")
 
-class MyCustomTool(BaseTool):
-    name: str = "Name of my tool"
-    description: str = (
-        "Clear description for what this tool is useful for, your agent will need this information to use it."
-    )
-    args_schema: Type[BaseModel] = MyCustomToolInput
+# class MyCustomTool(BaseTool):
+#     name: str = "Name of my tool"
+#     description: str = (
+#         "Clear description for what this tool is useful for, your agent will need this information to use it."
+#     )
+#     args_schema: Type[BaseModel] = MyCustomToolInput
 
-    def _run(self, argument: str) -> str:
-        # Implementation goes here
-        return "this is an example of a tool output, ignore it and move along."
+#     def _run(self, argument: str) -> str:
+#         # Implementation goes here
+#         return "this is an example of a tool output, ignore it and move along."
 
 # ========== WordExtractorTool ==========
 class WordExtractorInput(BaseModel):
@@ -102,3 +104,16 @@ class FalcIconInjectorTool(BaseTool):
 
         return markdown_text
 
+
+# ========== ReferenceModelRetrieverTool ==========
+
+class ReferenceModelRetrieverInput(BaseModel):
+    query: str = Field(..., description="Query to search for a similar FALC translation model.")
+
+class ReferenceModelRetrieverTool(RagTool):
+    name: str = "ReferenceModelRetriever"
+    description: str = (
+        "Use this tool to search a bank of reference FALC translations "
+        "and find similar documents based on your input."
+    )
+    args_schema: Type[BaseModel] = ReferenceModelRetrieverInput
