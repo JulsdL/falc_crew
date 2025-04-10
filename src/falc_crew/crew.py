@@ -1,5 +1,4 @@
 from crewai import Agent, Crew, Process, Task
-from crewai_tools import RagTool
 from crewai.project import CrewBase, agent, crew, task
 from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool, ReferenceModelRetrieverTool
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
@@ -33,30 +32,15 @@ class FalcCrew():
             config=self.agents_config['falc_translator'],
             tools=[FalcIconLookupTool(), WordExtractorTool(), self.reference_tool],
             memory=True,
-            verbose=True
+            verbose=True,
         )
 
-    @agent
-    def falc_quality_analyst(self) -> Agent:
-        return Agent(
-            config=self.agents_config['falc_quality_analyst'],
-            memory=True,
-            verbose=True
-        )
 
     @agent
     def falc_document_designer(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_document_designer'],
             tools=[FalcDocxWriterTool()],
-            memory=True,
-            verbose=True
-        )
-
-    @agent
-    def falc_visual_checker(self) -> Agent:
-        return Agent(
-            config=self.agents_config['falc_visual_checker'],
             memory=True,
             verbose=True
         )
@@ -71,11 +55,6 @@ class FalcCrew():
             config=self.tasks_config['translate_text_task'],
         )
 
-    @task
-    def quality_check_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['quality_check_task'],
-        )
 
     @task
     def generate_docx_task(self) -> Task:
@@ -83,11 +62,6 @@ class FalcCrew():
             config=self.tasks_config['generate_docx_task'],
         )
 
-    @task
-    def validate_visual_design_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['validate_visual_design_task'],
-        )
 
     @crew
     def crew(self) -> Crew:

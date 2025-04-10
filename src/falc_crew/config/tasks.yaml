@@ -36,14 +36,6 @@ translate_text_task:
 
   agent: falc_translator
 
-quality_check_task:
-  description: >
-    Review the FALC text for accuracy, compliance with FALC rules, and structure.
-    Correct non-compliant sections. Explain changes if needed.
-  expected_output: >
-    Finalized markdown with FALC-compliant text and explanation of adjustments.
-  agent: falc_quality_analyst
-
 generate_docx_task:
   description: >
     Convert the structured text into a .docx document using predefined
@@ -53,12 +45,3 @@ generate_docx_task:
     A Word (.docx) document saved to output/ directory,
     named `falc_translated_output.docx`
   agent: falc_document_designer
-
-validate_visual_design_task:
-  description: >
-    Validate that the generated Word document adheres to FALC visual design.
-    Check typography, spacing, alignment, and section layout.
-  expected_output: >
-    A short markdown report confirming if the document matches FALC
-    visual standards or requires changes.
-  agent: falc_visual_checker

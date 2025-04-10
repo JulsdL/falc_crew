@@ -9,6 +9,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Chainlit
+.chainlit/
+.files/
+
 # C extensions
 *.so
 
