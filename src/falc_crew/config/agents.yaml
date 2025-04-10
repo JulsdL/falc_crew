@@ -9,15 +9,6 @@ falc_translator:
     following the official FALC framework. You ensure clarity, brevity,
     and accessibility.
 
-falc_quality_analyst:
-  role: >
-    FALC Quality Analyst
-  goal: >
-    Verify that a text respects all FALC standards and suggest improvements
-  backstory: >
-    You review FALC content and fix errors in structure, lexicon,
-    or formatting to make it understandable for people with cognitive disabilities.
-
 falc_document_designer:
   role: >
     Accessible Document Designer
@@ -27,12 +18,3 @@ falc_document_designer:
   backstory: >
     You're specialized in making official documents accessible
     by applying correct typographic and layout standards.
-
-falc_visual_checker:
-  role: >
-    Visual Design Checker
-  goal: >
-    Check that a document matches EVAM's FALC visual identity and design guidelines
-  backstory: >
-    You're a visual accessibility reviewer. Your job is to ensure that
-    the final document layout respects formatting, spacing, and font standards.

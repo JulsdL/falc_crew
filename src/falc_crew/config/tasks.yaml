@@ -34,15 +34,9 @@ translate_text_task:
     This structure will be used to format the final Word document.
     You are not allowed to invent icons. Use only those provided by the icon lookup tool.
 
-  agent: falc_translator
+    Make sure to check with a human in FRENCH if the draft is good before finalizing your answer.
 
-quality_check_task:
-  description: >
-    Review the FALC text for accuracy, compliance with FALC rules, and structure.
-    Correct non-compliant sections. Explain changes if needed.
-  expected_output: >
-    Finalized markdown with FALC-compliant text and explanation of adjustments.
-  agent: falc_quality_analyst
+  agent: falc_translator
 
 generate_docx_task:
   description: >
@@ -53,12 +47,3 @@ generate_docx_task:
     A Word (.docx) document saved to output/ directory,
     named `falc_translated_output.docx`
   agent: falc_document_designer
-
-validate_visual_design_task:
-  description: >
-    Validate that the generated Word document adheres to FALC visual design.
-    Check typography, spacing, alignment, and section layout.
-  expected_output: >
-    A short markdown report confirming if the document matches FALC
-    visual standards or requires changes.
-  agent: falc_visual_checker
