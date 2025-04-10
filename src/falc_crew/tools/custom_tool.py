@@ -113,20 +113,20 @@ class FalcDocxWriterTool(BaseTool):
 
 
 
-# ========== FalcIconInjectorTool ==========
-class FalcIconInjectorInput(BaseModel):
-    """Input schema for FalcIconInjectorTool."""
-    markdown_text: str = Field(..., description="FALC markdown text to enhance by injecting icons based on keyword mapping.")
+# ========== FalcIconLookupTool ==========
+class FalcIconLookupInput(BaseModel):
+    """No input needed for this tool."""
+    pass
 
-
-class FalcIconInjectorTool(BaseTool):
-    name: str = "FalcIconInjectorTool"
+class FalcIconLookupTool(BaseTool):
+    name: str = "FalcIconLookupTool"
     description: str = (
-        "Scans a markdown text and inserts appropriate FALC icons (emojis or symbols) based on a keyword-to-icon map in knowledge/icons.json."
+        "Provides a dictionary of available icons based on keyword-to-emoji mapping "
+        "from the icons.json file, so the agent can decide where to use them."
     )
-    args_schema: Type[BaseModel] = FalcIconInjectorInput
+    args_schema: Type[BaseModel] = FalcIconLookupInput
 
-    def _run(self, markdown_text: str) -> str:
+    def _run(self) -> str:
         icons_path = os.path.join("knowledge", "icons.json")
         if not os.path.exists(icons_path):
             return "⚠️ Error: icons.json file not found in the 'knowledge/' directory."
@@ -134,10 +134,9 @@ class FalcIconInjectorTool(BaseTool):
         with open(icons_path, "r", encoding="utf-8") as f:
             icon_map = json.load(f)
 
-        for keyword, icon in icon_map.items():
-            markdown_text = markdown_text.replace(keyword, f"{icon} {keyword}")
+        formatted = "\n".join([f"- **{k}**: {v}" for k, v in icon_map.items()])
+        return f"📙 Available icons:\n{formatted}"
 
-        return markdown_text
 
 
 # ========== ReferenceModelRetrieverTool ==========
