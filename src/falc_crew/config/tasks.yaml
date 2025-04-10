@@ -12,6 +12,15 @@ translate_text_task:
     If you find a good match, follow its style and reuse structure or tone.
     Focus on short sentences, active voice, familiar vocabulary, and structure clarity.
 
+    You **must call** the `FalcIconLookupTool` to see which icons are available
+    before you decide to include any icons in your translation.
+
+    These icons are helpful visual cues (emojis) used to simplify understanding.
+    Do not invent your own icons — you may only use icons that are explicitly listed by the tool.
+
+    If you think a section would benefit from a visual symbol, choose one from the list provided
+    and include it in the appropriate location.
+
     Text to translate:
     {original_text}
   expected_output: >
@@ -23,6 +32,7 @@ translate_text_task:
     "footer": "Polite sign-off"
 
     This structure will be used to format the final Word document.
+    You are not allowed to invent icons. Use only those provided by the icon lookup tool.
 
   agent: falc_translator
 

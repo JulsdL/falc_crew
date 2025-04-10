@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task
 from crewai_tools import RagTool
 from crewai.project import CrewBase, agent, crew, task
-from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconInjectorTool, WordExtractorTool, ReferenceModelRetrieverTool
+from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool, ReferenceModelRetrieverTool
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.knowledge.source.json_knowledge_source import JSONKnowledgeSource
 
@@ -31,7 +31,7 @@ class FalcCrew():
     def falc_translator(self) -> Agent:
         return Agent(
             config=self.agents_config['falc_translator'],
-            tools=[FalcIconInjectorTool(), WordExtractorTool(), self.reference_tool],
+            tools=[FalcIconLookupTool(), WordExtractorTool(), self.reference_tool],
             memory=True,
             verbose=True
         )

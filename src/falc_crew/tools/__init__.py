@@ -1,3 +1,3 @@
-from .custom_tool import FalcDocxWriterTool, FalcIconInjectorTool, WordExtractorTool
+from .custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool
 
-__all__ = ["FalcDocxWriterTool", "FalcIconInjectorTool", "WordExtractorTool"]
+__all__ = ["FalcDocxWriterTool", "FalcIconLookupTool", "WordExtractorTool"]
