@@ -2,7 +2,7 @@ import os
 import json
 from crewai.tools import BaseTool
 from crewai_tools import RagTool
-from typing import Type
+from typing import List, Optional, Type
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 from docx import Document
@@ -44,38 +44,73 @@ class WordExtractorTool(BaseTool):
 
 # ========== FalcDocxWriterTool ==========
 class FalcDocxWriterInput(BaseModel):
-    """Input schema for FalcDocxWriterTool."""
-    markdown_text: str = Field(..., description="FALC markdown text to convert into a formatted DOCX document.")
+    header: Optional[str] = Field(None, description="Header block for the letter, typically sender info")
+    recipient: Optional[str] = Field(None, description="Recipient block, usually address and name")
+    subject: Optional[str] = Field(None, description="Subject line of the letter")
+    body_sections: List[str] = Field(..., description="List of paragraphs or markdown strings to be rendered")
+    footer: Optional[str] = Field(None, description="Final line or sign-off")
+    markdown_text: Optional[str] = Field(None, description="Fallback full markdown text")
 
 
 class FalcDocxWriterTool(BaseTool):
     name: str = "FalcDocxWriterTool"
     description: str = (
-        "Converts a markdown FALC text into a properly formatted .docx Word document using Arial font, spacing rules, and one sentence per line."
+        "Generate a structured FALC Word letter layout with optional header, subject, recipient and footer"
     )
     args_schema: Type[BaseModel] = FalcDocxWriterInput
 
-    def _run(self, markdown_text: str) -> str:
+    def _run(self, header=None, recipient=None, subject=None, body_sections=None, footer=None, markdown_text=None) -> str:
         document = Document()
 
-        # Default style
+        # Style config
         style = document.styles['Normal']
         font = style.font
         font.name = 'Arial'
         font.size = Pt(10)
 
-        for line in markdown_text.split("\n"):
-            if not line.strip():
-                continue
-            p = document.add_paragraph(line.strip())
-            p.paragraph_format.space_after = Pt(10)
-            p.paragraph_format.line_spacing = 1.5
+        # Add header and recipient as table
+        if header or recipient:
+            table = document.add_table(rows=1, cols=2)
+            table.autofit = False
+            hdr_cell, rcpt_cell = table.rows[0].cells
+            if header:
+                hdr_cell.text = header
+            if recipient:
+                rcpt_cell.text = recipient
+            document.add_paragraph("")  # Spacer
 
+        # Subject
+        if subject:
+            subject_paragraph = document.add_paragraph(subject)
+            subject_paragraph.style = 'Heading 2'
+
+        # Body content
+        if body_sections:
+            for section in body_sections:
+                clean = section.strip()
+                if not clean:
+                    continue
+                if clean.startswith("##"):
+                    heading = clean.replace("##", "").strip()
+                    document.add_paragraph(heading, style='Heading 3')
+                else:
+                    paragraph = document.add_paragraph(clean)
+                    paragraph.paragraph_format.space_after = Pt(10)
+                    paragraph.paragraph_format.line_spacing = 1.5
+
+        if not body_sections and markdown_text:
+            body_sections = markdown_text.splitlines()
+
+        # Footer
+        if footer:
+            document.add_paragraph("\n" + footer)
+
+        # Save output
         output_path = "output/falc_translated_output.docx"
         os.makedirs("output", exist_ok=True)
         document.save(output_path)
+        return f"✅ FALC document generated: {output_path}"
 
-        return f"Document Word FALC generated at: {output_path}"
 
 
 # ========== FalcIconInjectorTool ==========

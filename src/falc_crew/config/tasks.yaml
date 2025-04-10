@@ -15,8 +15,15 @@ translate_text_task:
     Text to translate:
     {original_text}
   expected_output: >
-    A markdown version of the FALC-compliant text, respecting the structure and
-    accessible language rules.
+    Your output MUST be a dictionary with the following fields:
+    "header": "Sender details and organization block"
+    "recipient": "Recipient address block"
+    "subject": "Document subject line"
+    "body_sections": "[Section titles or text blocks, one per paragraph or heading]"
+    "footer": "Polite sign-off"
+
+    This structure will be used to format the final Word document.
+
   agent: falc_translator
 
 quality_check_task:
@@ -29,7 +36,7 @@ quality_check_task:
 
 generate_docx_task:
   description: >
-    Convert the markdown text into a .docx document using predefined
+    Convert the structured text into a .docx document using predefined
     formatting guidelines:
     Arial font, size 10 for body text, size 8 for headers, spacing 1.5x.
   expected_output: >
