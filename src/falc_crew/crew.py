@@ -53,7 +53,6 @@ class FalcCrew():
     def translate_text_task(self) -> Task:
         return Task(
             config=self.tasks_config['translate_text_task'],
-            human_input=True
         )
 
 

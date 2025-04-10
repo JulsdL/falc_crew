@@ -34,8 +34,6 @@ translate_text_task:
     This structure will be used to format the final Word document.
     You are not allowed to invent icons. Use only those provided by the icon lookup tool.
 
-    Make sure to check with a human in FRENCH if the draft is good before finalizing your answer.
-
   agent: falc_translator
 
 generate_docx_task:
