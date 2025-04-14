@@ -5,7 +5,7 @@ from crewai.tools import BaseTool
 from crewai_tools import RagTool
 from typing import List, Optional, Type
 from pydantic import BaseModel, Field
-from typing import Dict, Any
+from datetime import datetime
 from docx import Document
 from docx.shared import Pt, Inches
 
@@ -43,6 +43,39 @@ class WordExtractorTool(BaseTool):
         text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
         return text
 
+# ========== FalcDocxStructureTaggerTool ==========
+
+class FalcDocxStructureTaggerInput(BaseModel):
+    paragraphs: List[str] = Field(..., description="List of paragraphs extracted from the original .docx file.")
+
+class FalcDocxStructureTaggerTool(BaseTool):
+    name: str = "FalcDocxStructureTaggerTool"
+    description: str = (
+        "Receives a list of paragraphs from the original .docx and tags which paragraph(s) represent the subject and the body."
+    )
+    args_schema: Type[BaseModel] = FalcDocxStructureTaggerInput
+
+    def _run(self, paragraphs: List[str]) -> str:
+        numbered = "\n".join([f"{i}. {p}" for i, p in enumerate(paragraphs)])
+        prompt = f"""Here is a list of Word doc paragraphs. Identify:
+        - the paragraph index of the subject
+        - paragraph indexes of the body
+
+        Paragraphs:
+        {numbered}
+
+        Return only JSON like:
+        {{ "subject": [index], "body": [i, j, ...] }}"""
+
+        from openai import OpenAI
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return response.choices[0].message.content
+
+
 # ========== FalcDocxWriterTool ==========
 class FalcDocxWriterInput(BaseModel):
     header: Optional[str] = Field(None, description="Header block for the letter, typically sender info")
@@ -51,6 +84,9 @@ class FalcDocxWriterInput(BaseModel):
     body_sections: List[str] = Field(..., description="List of paragraphs or markdown strings to be rendered")
     footer: Optional[str] = Field(None, description="Final line or sign-off")
     markdown_text: Optional[str] = Field(None, description="Fallback full markdown text")
+    original_file: Optional[str] = Field(None, description="Path to the original .docx file")
+    subject_index: Optional[int] = Field(None, description="Index of the subject paragraph to replace in the original file")
+    body_indexes: Optional[List[int]] = Field(None, description="Indexes of body paragraphs to replace in the original file")
 
 
 class FalcDocxWriterTool(BaseTool):
@@ -100,67 +136,94 @@ class FalcDocxWriterTool(BaseTool):
 
                 paragraph.add_run(part)
 
-    def _run(self, header=None, recipient=None, subject=None, body_sections=None, footer=None, markdown_text=None) -> str:
-        document = Document()
-
-        # Style config: use Arial at size 10 for the normal text.
-        style = document.styles['Normal']
-        font = style.font
-        font.name = 'Arial'
-        font.size = Pt(10)
-
-        # Add header and recipient as a table if present.
-        if header or recipient:
-            table = document.add_table(rows=1, cols=2)
-            table.autofit = False
-            hdr_cell, rcpt_cell = table.rows[0].cells
-            if header:
-                hdr_cell.text = header
-            if recipient:
-                rcpt_cell.text = recipient
-            document.add_paragraph("")  # Spacer
-
-        # Subject with Heading 2.
-        if subject:
-            subject_paragraph = document.add_paragraph(subject)
-            subject_paragraph.style = 'Heading 2'
-
-        # Load the icons mapping (company-defined icons with PNG file paths).
+    def _run(
+        self,
+        header=None,
+        recipient=None,
+        subject=None,
+        body_sections=None,
+        footer=None,
+        markdown_text=None,
+        original_file=None,
+        subject_index=None,
+        body_indexes=None
+    ) -> str:
         icons_map = self.load_icons_map()
 
-        # Body content
-        if body_sections:
-            for section in body_sections:
-                clean = section.strip()
-                if not clean:
-                    continue
-                # Check if the section is a heading (starts with ##).
-                if clean.startswith("##"):
-                    heading = clean.replace("##", "").strip()
-                    document.add_paragraph(heading, style='Heading 3')
-                else:
-                    # Create a paragraph and process inline icon placeholders.
-                    paragraph = document.add_paragraph()
-                    self._insert_text_and_icons(paragraph, clean, icons_map)
-                    paragraph.paragraph_format.space_after = Pt(10)
-                    paragraph.paragraph_format.line_spacing = 1.5
+        if original_file and subject_index is not None and body_indexes:
+            # 🔁 Rewrite mode
+            doc = Document(original_file)
+            paragraphs = doc.paragraphs
 
-        if not body_sections and markdown_text:
-            for line in markdown_text.splitlines():
-                paragraph = document.add_paragraph(line)
-                paragraph.paragraph_format.space_after = Pt(10)
-                paragraph.paragraph_format.line_spacing = 1.5
+            if 0 <= subject_index < len(paragraphs):
+                para = paragraphs[subject_index]
+                para.clear()
+                self._insert_text_and_icons(para, subject, icons_map)
 
-        # Footer
-        if footer:
-            document.add_paragraph("\n" + footer)
+            for i, section in zip(body_indexes, body_sections):
+                if 0 <= i < len(paragraphs):
+                    para = paragraphs[i]
+                    para.clear()
+                    self._insert_text_and_icons(para, section, icons_map)
 
-        # Save output
-        output_path = "output/falc_translated_output.docx"
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+            original_name = os.path.splitext(os.path.basename(original_file))[0]
+            output_filename = f"{original_name}_falc_{timestamp}.docx"
+            output_path = os.path.join("output", output_filename)
+        else:
+            # 🆕 Build new layout
+            doc = Document()
+
+            # Style
+            style = doc.styles['Normal']
+            font = style.font
+            font.name = 'Arial'
+            font.size = Pt(10)
+
+            # Header/Recipient
+            if header or recipient:
+                table = doc.add_table(rows=1, cols=2)
+                table.autofit = False
+                hdr_cell, rcpt_cell = table.rows[0].cells
+                if header:
+                    hdr_cell.text = header
+                if recipient:
+                    rcpt_cell.text = recipient
+                doc.add_paragraph("")
+
+            # Subject
+            if subject:
+                subject_paragraph = doc.add_paragraph(subject)
+                subject_paragraph.style = 'Heading 2'
+
+            # Body
+            if body_sections:
+                for section in body_sections:
+                    clean = section.strip()
+                    if not clean:
+                        continue
+                    if clean.startswith("##"):
+                        doc.add_paragraph(clean.replace("##", "").strip(), style='Heading 3')
+                    else:
+                        p = doc.add_paragraph()
+                        self._insert_text_and_icons(p, clean, icons_map)
+                        p.paragraph_format.space_after = Pt(10)
+                        p.paragraph_format.line_spacing = 1.5
+            elif markdown_text:
+                for line in markdown_text.splitlines():
+                    p = doc.add_paragraph(line)
+                    p.paragraph_format.space_after = Pt(10)
+                    p.paragraph_format.line_spacing = 1.5
+
+            # Footer
+            if footer:
+                doc.add_paragraph("\n" + footer)
+
+            output_path = "output/falc_translated_output.docx"
+
         os.makedirs("output", exist_ok=True)
-        document.save(output_path)
-        return f"✅ FALC document generated: {output_path}"
-
+        doc.save(output_path)
+        return f"✅ FALC document saved: {output_path}"
 
 
 # ========== FalcIconLookupTool ==========

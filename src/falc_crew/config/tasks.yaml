@@ -33,7 +33,8 @@ translate_text_task:
     "body_sections": "[Section titles or text blocks, one per paragraph or heading]"
     "footer": "Polite sign-off"
 
-    The subject body sections MUST contain the best icon placeholder in the format [[ICON:KEY]]
+    The paragraphs in the subject body sections MUST contain the best icon placeholder in the format [[ICON:KEY]]
+    DO not add icon in the other sections.
 
     This structure will be used to format the final Word document.
 
@@ -41,12 +42,23 @@ translate_text_task:
 
   agent: falc_translator
 
-generate_docx_task:
+
+rewrite_original_doc_task:
   description: >
-    Convert the structured text into a .docx document using predefined
-    formatting guidelines:
-    Arial font, size 10 for body text, size 8 for headers, spacing 1.5x.
+    Update the original Word file at {original_doc_path} using the FALC translation.
+
+    Replace:
+    - Paragraph at index {subject_index} with the translated subject
+    - Paragraphs at indexes {body_indexes} with the translated body
+
+    The following values will be passed:
+    - subject
+    - body_sections
+    - header (optional)
+    - recipient (optional)
+    - footer (optional)
+
   expected_output: >
-    A Word (.docx) document saved to output/ directory,
-    named `falc_translated_output.docx`
+    A .docx file rewritten in-place, saved as `output/falc_finalized_output.docx`.
+
   agent: falc_document_designer

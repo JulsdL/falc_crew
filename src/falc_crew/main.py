@@ -2,11 +2,12 @@
 import sys
 import os
 import warnings
-
+import json
 from datetime import datetime
+from docx import Document
 
 from falc_crew.crew import FalcCrew
-from falc_crew.tools.custom_tool import WordExtractorTool, FalcIconLookupTool
+from falc_crew.tools.custom_tool import WordExtractorTool, FalcIconLookupTool, FalcDocxStructureTaggerTool
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -20,14 +21,36 @@ def run(file_path: str="data/ASOC_Droit indemnites chomage.docx"):
     Run the crew.
     """
     print(f"📄 Lecture du fichier source : {file_path}")
+
     extractor = WordExtractorTool()
     text = extractor._run(file_path)
+
+    # Also get full paragraph list for tagging
+    doc = Document(file_path)
+    all_paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+
+    # Run structure tagging
+    tagger = FalcDocxStructureTaggerTool()
+    tag_response = tagger._run(all_paragraphs)
+
+    try:
+        tag_data = json.loads(tag_response)
+        subject_index = tag_data.get("subject", [])[0]
+        body_indexes = tag_data.get("body", [])
+
+    except Exception as e:
+        raise Exception(f"❌ Failed to parse structure tagging response: {tag_response}") from e
+
+
     icon_list = FalcIconLookupTool()._run()
 
     print("🚀 Lancement du crew avec le contenu extrait...")
     inputs = {
         "original_text": text,
         "source_filename": os.path.basename(file_path),
+        "original_doc_path": file_path,
+        "subject_index": subject_index,
+        "body_indexes": body_indexes,
         "icon_list": icon_list,
     }
 
