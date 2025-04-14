@@ -2,6 +2,17 @@ translate_text_task:
   description: >
     Translate the following text into FALC using provided editorial and design rules.
 
+    You must first consult the available icons list:
+
+    {icon_list}
+
+    Use only the icon keys listed here and embed them with the format: [[ICON:icon_key]].
+
+    Do NOT use emojis.
+    Do NOT invent new keys.
+
+    ONLY use icons from the list above in the format: [[ICON:KEY]]
+
     You have access to a Knowledge base tool that contains example translations.
     First, check if any reference model matches the topic using the ReferenceModelRetriever tool.
 
@@ -11,15 +22,6 @@ translate_text_task:
 
     If you find a good match, follow its style and reuse structure or tone.
     Focus on short sentences, active voice, familiar vocabulary, and structure clarity.
-
-    You **must call** the `FalcIconLookupTool` to see which icons are available
-    before you decide to include any icons in your translation.
-
-    These icons are helpful visual cues (emojis) used to simplify understanding.
-    Do not invent your own icons — you may only use icons that are explicitly listed by the tool.
-
-    If you think a section would benefit from a visual symbol, choose one from the list provided
-    and include it in the appropriate location.
 
     Text to translate:
     {original_text}
@@ -31,8 +33,11 @@ translate_text_task:
     "body_sections": "[Section titles or text blocks, one per paragraph or heading]"
     "footer": "Polite sign-off"
 
+    The subject body sections MUST contain the best icon placeholder in the format [[ICON:KEY]]
+
     This structure will be used to format the final Word document.
-    You are not allowed to invent icons. Use only those provided by the icon lookup tool.
+
+    Emojis ARE STRICLY PROHIBITED.
 
   agent: falc_translator
 
