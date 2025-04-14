@@ -6,7 +6,7 @@ import warnings
 from datetime import datetime
 
 from falc_crew.crew import FalcCrew
-from falc_crew.tools.custom_tool import WordExtractorTool
+from falc_crew.tools.custom_tool import WordExtractorTool, FalcIconLookupTool
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -22,11 +22,13 @@ def run(file_path: str="data/ASOC_Droit indemnites chomage.docx"):
     print(f"📄 Lecture du fichier source : {file_path}")
     extractor = WordExtractorTool()
     text = extractor._run(file_path)
+    icon_list = FalcIconLookupTool()._run()
 
     print("🚀 Lancement du crew avec le contenu extrait...")
     inputs = {
         "original_text": text,
-        "source_filename": os.path.basename(file_path)
+        "source_filename": os.path.basename(file_path),
+        "icon_list": icon_list,
     }
 
     try:
