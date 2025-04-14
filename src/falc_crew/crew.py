@@ -1,6 +1,6 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool, ReferenceModelRetrieverTool
+from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool, ReferenceModelRetrieverTool, FalcDocxRewriterTool
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.knowledge.source.json_knowledge_source import JSONKnowledgeSource
 
@@ -42,7 +42,7 @@ class FalcCrew():
             config=self.agents_config['falc_document_designer'],
             tools=[FalcDocxWriterTool()],
             memory=True,
-            verbose=True
+            verbose=True,
         )
 
 
@@ -57,9 +57,9 @@ class FalcCrew():
 
 
     @task
-    def generate_docx_task(self) -> Task:
+    def rewrite_original_doc_task(self) -> Task:
         return Task(
-            config=self.tasks_config['generate_docx_task'],
+            config=self.tasks_config['rewrite_original_doc_task'],
         )
 
 
