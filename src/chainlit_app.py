@@ -1,6 +1,7 @@
 import chainlit as cl
 import os
 import uuid
+import shutil
 import asyncio
 from falc_crew.main import run
 
@@ -18,6 +19,10 @@ async def on_chat_start():
     output_dir = os.path.join("output", session_id)
     os.makedirs(upload_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
+
+    # Store the upload and output directories in the user session
+    cl.user_session.set("upload_dir", upload_dir)
+    cl.user_session.set("output_dir", output_dir)
 
     # Prompt the user to upload a Word (.docx) file using AskFileMessage.
     files = await cl.AskFileMessage(
@@ -90,3 +95,20 @@ async def on_chat_start():
         content=f"✅ Voici votre document FALC généré : **{latest_file}**.",
         elements=[file_element]
     ).send()
+
+
+#  Cleanup session_id directories and files after chat ends
+@cl.on_chat_end
+def end():
+    try:
+        upload_dir = cl.user_session.get("upload_dir")
+        output_dir = cl.user_session.get("output_dir")
+
+        for dir_path in [upload_dir, output_dir]:
+            if dir_path and os.path.exists(dir_path):
+                try:
+                    shutil.rmtree(dir_path)
+                except Exception as inner_err:
+                    print(f"⚠️ Failed to delete {dir_path}")
+    except Exception as e:
+        print(f"⚠️ Error during session cleanup: {e}")
