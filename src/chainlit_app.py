@@ -14,7 +14,7 @@ async def process_upload():
 
     # Prompt upload
     files = await cl.AskFileMessage(
-        content="📄 Veuillez charger un document Word (.docx) à traduire.",
+        content="📄 Veuillez charger un nouveau document Word (.docx) à traduire.",
         accept={"application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"]},
         max_files=1,
         timeout=300,
@@ -35,7 +35,8 @@ async def process_upload():
     await cl.Message(content=f"📝 Fichier reçu : **{file_name}**\n⏳ Traitement en cours (~1 minute)...").send()
 
     try:
-        await asyncio.to_thread(run, file_path=new_file_path, output_dir=output_dir)
+        # await asyncio.to_thread(run, file_path=new_file_path, output_dir=output_dir)
+        await run(file_path=new_file_path, output_dir=output_dir)
     except Exception as e:
         await cl.Message(content=f"❌ Erreur durant le traitement : {e}").send()
         return

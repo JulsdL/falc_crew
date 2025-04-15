@@ -10,21 +10,6 @@ from docx import Document
 from docx.shared import Pt, Inches
 
 
-# class MyCustomToolInput(BaseModel):
-#     """Input schema for MyCustomTool."""
-#     argument: str = Field(..., description="Description of the argument.")
-
-# class MyCustomTool(BaseTool):
-#     name: str = "Name of my tool"
-#     description: str = (
-#         "Clear description for what this tool is useful for, your agent will need this information to use it."
-#     )
-#     args_schema: Type[BaseModel] = MyCustomToolInput
-
-#     def _run(self, argument: str) -> str:
-#         # Implementation goes here
-#         return "this is an example of a tool output, ignore it and move along."
-
 # ========== WordExtractorTool ==========
 class WordExtractorInput(BaseModel):
     file_path: str = Field(..., description="Chemin vers le document Word source (.docx)")
@@ -42,6 +27,7 @@ class WordExtractorTool(BaseTool):
         doc = Document(file_path)
         text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
         return text
+
 
 # ========== FalcDocxStructureTaggerTool ==========
 
@@ -74,6 +60,7 @@ class FalcDocxStructureTaggerTool(BaseTool):
             messages=[{"role": "user", "content": prompt}],
         )
         return response.choices[0].message.content
+
 
 
 # ========== FalcDocxWriterTool ==========
