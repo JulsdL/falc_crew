@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.6] - 2025-04-15
+## Changed
+- Refactored the main execution flow to use asynchronous steps with Chainlit for improved document processing.
+- Added user feedback mechanism with Chainlit Steps to indicate progress during document processing.
+- Removed unused custom tool code and streamlined tool implementations.
+
 ## [0.0.5] - 2025-04-15
 
 ## Added

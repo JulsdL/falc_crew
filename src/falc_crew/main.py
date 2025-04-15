@@ -16,35 +16,39 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run(file_path: str="data/ASOC_Droit indemnites chomage.docx", output_dir: str="output"):
-    """
-    Run the crew.
-    """
+import chainlit as cl
+
+@cl.step(name="📄 Lecture du document Word")
+async def extract_text(file_path):
+    extractor = WordExtractorTool()
+    return extractor._run(file_path)
+
+@cl.step(name="🔍 Analyse de la structure du document")
+async def tag_structure(doc_path):
+    doc = Document(doc_path)
+    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+    tagger = FalcDocxStructureTaggerTool()
+    return tagger._run(paragraphs)
+
+@cl.step(name="🔎 Chargement des icônes disponibles")
+async def load_icon_list():
+    return FalcIconLookupTool()._run()
+
+async def run(file_path: str, output_dir: str):
     print(f"📄 Lecture du fichier source : {file_path}")
 
-    extractor = WordExtractorTool()
-    text = extractor._run(file_path)
-
-    # Also get full paragraph list for tagging
-    doc = Document(file_path)
-    all_paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-
-    # Run structure tagging
-    tagger = FalcDocxStructureTaggerTool()
-    tag_response = tagger._run(all_paragraphs)
+    text = await extract_text(file_path)
+    tag_response = await tag_structure(file_path)
 
     try:
         tag_data = json.loads(tag_response)
         subject_index = tag_data.get("subject", [])[0]
         body_indexes = tag_data.get("body", [])
-
     except Exception as e:
         raise Exception(f"❌ Failed to parse structure tagging response: {tag_response}") from e
 
+    icon_list = await load_icon_list()
 
-    icon_list = FalcIconLookupTool()._run()
-
-    print("🚀 Lancement du crew avec le contenu extrait...")
     inputs = {
         "original_text": text,
         "source_filename": os.path.basename(file_path),
@@ -55,17 +59,20 @@ def run(file_path: str="data/ASOC_Droit indemnites chomage.docx", output_dir: st
         "output_dir": output_dir,
     }
 
+    @cl.step(name="📄 Traduction FALC en cours...")
+    async def kickoff_crew(inputs):
+        async with cl.Step(name="📄 Lancement", type="system") as step:
+            step.input = "Texte prêt pour la traduction"
+            step.output = "Analyse en cours..."
+
+        return await FalcCrew().crew().kickoff_async(inputs=inputs)
+
     try:
-        result = FalcCrew().crew().kickoff(inputs=inputs)
-        # Extract the last file created in the output dir
-        output_files = sorted(
-            [f for f in os.listdir("output") if f.endswith(".docx")],
-            key=lambda x: os.path.getmtime(os.path.join("output", x)),
-            reverse=True
-        )
-        return os.path.join("output", output_files[0]) if output_files else None
+        # await FalcCrew().crew().kickoff_async(inputs=inputs)
+        await kickoff_crew(inputs)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
+
 
 
 
