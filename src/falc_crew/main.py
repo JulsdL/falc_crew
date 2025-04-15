@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run(file_path: str="data/ASOC_Droit indemnites chomage.docx"):
+def run(file_path: str="data/ASOC_Droit indemnites chomage.docx", output_dir: str="output"):
     """
     Run the crew.
     """
@@ -52,12 +52,21 @@ def run(file_path: str="data/ASOC_Droit indemnites chomage.docx"):
         "subject_index": subject_index,
         "body_indexes": body_indexes,
         "icon_list": icon_list,
+        "output_dir": output_dir,
     }
 
     try:
-        FalcCrew().crew().kickoff(inputs=inputs)
+        result = FalcCrew().crew().kickoff(inputs=inputs)
+        # Extract the last file created in the output dir
+        output_files = sorted(
+            [f for f in os.listdir("output") if f.endswith(".docx")],
+            key=lambda x: os.path.getmtime(os.path.join("output", x)),
+            reverse=True
+        )
+        return os.path.join("output", output_files[0]) if output_files else None
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
+
 
 
 def train():

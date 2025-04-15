@@ -42,7 +42,6 @@ translate_text_task:
 
   agent: falc_translator
 
-
 rewrite_original_doc_task:
   description: >
     Update the original Word file at {original_doc_path} using the FALC translation.
@@ -57,8 +56,9 @@ rewrite_original_doc_task:
     - header (optional)
     - recipient (optional)
     - footer (optional)
+    - output_dir: {output_dir}
 
   expected_output: >
-    A .docx file rewritten in-place, saved as `output/falc_finalized_output.docx`.
+    A .docx file rewritten in-place, saved as output/{session_id}/document_name_falc_TIMESTAMP.docx
 
   agent: falc_document_designer

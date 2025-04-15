@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.5] - 2025-04-15
+
+## Added
+- Implemented session-based isolation for file uploads and outputs using unique session IDs.
+- Enhanced the document processing pipeline to support session-specific output directories.
+
+## Changed
+- Updated the document processing workflow to handle output files dynamically based on session context.
+
 ## [0.0.4] - 2025-04-14
 
 ## Added

@@ -87,6 +87,7 @@ class FalcDocxWriterInput(BaseModel):
     original_file: Optional[str] = Field(None, description="Path to the original .docx file")
     subject_index: Optional[int] = Field(None, description="Index of the subject paragraph to replace in the original file")
     body_indexes: Optional[List[int]] = Field(None, description="Indexes of body paragraphs to replace in the original file")
+    output_dir: Optional[str] = Field(None, description="Optional directory path where to save the output docx")
 
 
 class FalcDocxWriterTool(BaseTool):
@@ -146,7 +147,8 @@ class FalcDocxWriterTool(BaseTool):
         markdown_text=None,
         original_file=None,
         subject_index=None,
-        body_indexes=None
+        body_indexes=None,
+        output_dir=None
     ) -> str:
         icons_map = self.load_icons_map()
 
@@ -169,7 +171,10 @@ class FalcDocxWriterTool(BaseTool):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             original_name = os.path.splitext(os.path.basename(original_file))[0]
             output_filename = f"{original_name}_falc_{timestamp}.docx"
-            output_path = os.path.join("output", output_filename)
+            output_dir = output_dir or "output"
+            os.makedirs(output_dir, exist_ok=True)
+            output_path = os.path.join(output_dir, output_filename)
+
         else:
             # 🆕 Build new layout
             doc = Document()
@@ -219,7 +224,10 @@ class FalcDocxWriterTool(BaseTool):
             if footer:
                 doc.add_paragraph("\n" + footer)
 
-            output_path = "output/falc_translated_output.docx"
+            output_dir = output_dir or "output"
+            os.makedirs(output_dir, exist_ok=True)
+            output_path = os.path.join(output_dir, "falc_translated_output.docx")
+
 
         os.makedirs("output", exist_ok=True)
         doc.save(output_path)
