@@ -1,6 +1,6 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool, ReferenceModelRetrieverTool, FalcDocxRewriterTool
+from falc_crew.tools.custom_tool import FalcDocxWriterTool, FalcIconLookupTool, WordExtractorTool, ReferenceModelRetrieverTool
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.knowledge.source.json_knowledge_source import JSONKnowledgeSource
 
