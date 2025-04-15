@@ -2,7 +2,6 @@ import chainlit as cl
 import os
 import uuid
 import shutil
-import asyncio
 from falc_crew.main import run
 
 

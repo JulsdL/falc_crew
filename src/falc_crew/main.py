@@ -74,21 +74,88 @@ async def run(file_path: str, output_dir: str):
         raise Exception(f"An error occurred while running the crew: {e}")
 
 
-
-
 def train():
     """
-    Train the crew for a given number of iterations.
+    Train the crew using a real document from test/data/.
+    Usage: uv run train <iterations> <output_filename.pkl> <docx_path (optional)>
     """
-    inputs = {
-        "topic": "AI LLMs",
-        "current_year": str(datetime.now().year)
-    }
-    try:
-        FalcCrew().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
+    from falc_crew.main import extract_text, tag_structure, load_icon_list
 
+    # Prompt user for file
+    train_doc_path = input("📄 Please enter the path to the .docx file you want to train on:\n> ").strip()
+
+    if not train_doc_path or not os.path.exists(train_doc_path):
+        raise Exception(f"❌ Document not found: {train_doc_path}")
+
+    # Defaults
+    iterations = 5
+    # filename = f"trained_{os.path.splitext(os.path.basename(train_doc_path))[0]}.pkl"
+    output_dir = "output/training"
+
+    if not os.path.exists(train_doc_path):
+        raise Exception(f"❌ Document not found: {train_doc_path}")
+
+    def extract_text(file_path):
+        extractor = WordExtractorTool()
+        return extractor._run(file_path)
+
+    def tag_structure(train_doc_path):
+        doc = Document(train_doc_path)
+        paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+        tagger = FalcDocxStructureTaggerTool()
+        return tagger._run(paragraphs)
+
+    def load_icon_list():
+        return FalcIconLookupTool()._run()
+
+    # Async preprocessing
+    text = extract_text(train_doc_path)
+    tag_response = tag_structure(train_doc_path)
+
+    try:
+        tag_data = json.loads(tag_response)
+        subject_index = tag_data.get("subject", [])[0]
+        body_indexes = tag_data.get("body", [])
     except Exception as e:
-        raise Exception(f"An error occurred while training the crew: {e}")
+        raise Exception(f"❌ Structure tagging failed: {tag_response}") from e
+
+    icon_list = load_icon_list()
+
+    inputs = {
+        "original_text": text,
+        "source_filename": os.path.basename(train_doc_path),
+        "original_doc_path": train_doc_path,
+        "subject_index": subject_index,
+        "body_indexes": body_indexes,
+        "icon_list": icon_list,
+        "output_dir": output_dir,
+    }
+
+    # Train
+    try:
+        print(f"\n🏋️ Training on: {inputs['source_filename']} for {iterations} iterations")
+        FalcCrew().crew().train(
+            n_iterations=int(sys.argv[1]),
+            filename=sys.argv[2],
+            inputs=inputs
+        )
+        print("✅ Training complete!")
+    except Exception as e:
+        raise Exception(f"❌ Training failed: {e}")
+
+# def train():
+#     """
+#     Train the crew for a given number of iterations.
+#     """
+#     inputs = {
+#         "topic": "AI LLMs",
+#         "current_year": str(datetime.now().year)
+#     }
+#     try:
+#         FalcCrew().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
+
+#     except Exception as e:
+#         raise Exception(f"An error occurred while training the crew: {e}")
 
 def replay():
     """

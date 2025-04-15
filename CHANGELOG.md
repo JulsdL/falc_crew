@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.7] - 2025-04-15
+## Changed
+- Updated the training function to use a real document for input and added user prompts for file selection.
+- Improved error handling and logging during the training process.
+- Removed unused imports to streamline the codebase.
+
 ## [0.0.6] - 2025-04-15
 ## Changed
 - Refactored the main execution flow to use asynchronous steps with Chainlit for improved document processing.
