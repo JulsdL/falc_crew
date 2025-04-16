@@ -1,22 +1,32 @@
 #!/usr/bin/env python
 import sys
 import os
+import base64
 import warnings
 import json
+import openlit
+import chainlit as cl
 from datetime import datetime
 from docx import Document
-
 from falc_crew.crew import FalcCrew
 from falc_crew.tools.custom_tool import WordExtractorTool, FalcIconLookupTool, FalcDocxStructureTaggerTool
+from dotenv import load_dotenv
+
+load_dotenv()
+
+LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
+
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+os.environ["OPENAI_API_KEY"]= os.getenv("OPENAI_API_KEY")
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
-# This main file is intended to be a way for you to run your
-# crew locally, so refrain from adding unnecessary logic into this file.
-# Replace with inputs you want to test with, it will automatically
-# interpolate any tasks and agents information
+# Initialize OpenLit for telemetry
+openlit.init()
 
-import chainlit as cl
 
 @cl.step(name="📄 Lecture du document Word")
 async def extract_text(file_path):
@@ -68,7 +78,6 @@ async def run(file_path: str, output_dir: str):
         return await FalcCrew().crew().kickoff_async(inputs=inputs)
 
     try:
-        # await FalcCrew().crew().kickoff_async(inputs=inputs)
         await kickoff_crew(inputs)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
