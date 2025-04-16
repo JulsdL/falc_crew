@@ -10,7 +10,6 @@ __pycache__/
 *$py.class
 
 # Chainlit
-.chainlit/
 .files/
 
 # C extensions
